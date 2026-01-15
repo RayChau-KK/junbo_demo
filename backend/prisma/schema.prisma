@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户模型
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  avatar    String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  projects  Project[]
+  documents Document[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+// 项目模型
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(PLANNING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents   Document[]
+  requirements Requirement[]
+  architectures Architecture[]
+
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+// 文档模型（知识库）
+model Document {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @db.Text
+  type      DocumentType
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+enum DocumentType {
+  NOTE          // 笔记
+  PRD           // 产品需求文档
+  ARCHITECTURE  // 架构文档
+  FLOW          // 流程文档
+  OTHER         // 其他
+}
+
+// 需求模型
+model Requirement {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  priority    Priority @default(MEDIUM)
+  status      RequirementStatus @default(DRAFT)
+  acceptanceCriteria String? @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("requirements")
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum RequirementStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+  IMPLEMENTED
+  REJECTED
+}
+
+// 产品架构模型
+model Architecture {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  diagram     String?  @db.Text  // 存储为 JSON 或 Mermaid 格式
+  type        ArchitectureType
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("architectures")
+}
+
+enum ArchitectureType {
+  SYSTEM        // 系统架构
+  BUSINESS      // 业务架构
+  DATA          // 数据架构
+  TECHNICAL     // 技术架构
+}

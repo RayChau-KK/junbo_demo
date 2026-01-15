@@ -1,0 +1,32 @@
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // 启用 CORS
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+  });
+
+  // 启用全局验证管道
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  // 设置全局前缀
+  app.setGlobalPrefix('api');
+
+  const port = process.env.PORT || 4000;
+  await app.listen(port);
+
+  console.log(`🚀 Super PM Backend is running on: http://localhost:${port}/api`);
+}
+
+bootstrap();
