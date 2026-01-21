@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组合包规避规则配置系统 - 完整原型（V1.4）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        /* 原型导航 - 放在最顶部 */
+        .prototype-nav {
+            background: #fff3cd;
+            border-bottom: 3px solid #ffc107;
+            padding: 12px 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .prototype-nav-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .prototype-nav-desc {
+            font-size: 12px;
+            color: #856404;
+            margin-bottom: 12px;
+        }
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 60px - 110px);
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #34495e;
+            color: #ecf0f1;
+            padding: 16px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #bdc3c7;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            background: #2c3e50;
+            color: #3498db;
+        }
+
+        .menu-item.active {
+            background: #2c3e50;
+            color: #3498db;
+            border-left: 3px solid #3498db;
+            padding-left: 21px;
+        }
+
+        .submenu {
+            list-style: none;
+            background: #2c3e50;
+        }
+
+        .submenu-item {
+            padding: 10px 24px 10px 48px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #95a5a6;
+            transition: all 0.3s;
+        }
+
+        .submenu-item:hover {
+            background: #283747;
+            color: #3498db;
+        }
+
+        .submenu-item.active {
+            color: #3498db;
+            background: #283747;
+            border-left: 3px solid #3498db;
+            padding-left: 45px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        /* 原型页面切换Tab - 已移到顶部 */
+        .prototype-tabs {
+            display: none; /* 不再使用，已改为顶部导航 */
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tab {
+            padding: 8px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #856404;
+            background: white;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: #ffc107;
+            color: white;
+        }
+
+        .tab.active {
+            background: #ffc107;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* 原型页面容器 */
+        .prototype-page {
+            display: none;
+        }
+
+        .prototype-page.active {
+            display: block;
+        }
+
+        .breadcrumb {
+            background: white;
+            padding: 16px 24px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb-left span {
+            color: #333;
+        }
+
+        .btn-back {
+            background: #3498db;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-back:hover {
+            background: #2980b9;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 4px;
+            padding: 24px;
+        }
+
+        /* 列表页面样式 */
+        .filter-section {
+            background: #fafafa;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .filter-item {
+            flex: 1;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-query, .btn-reset {
+            padding: 8px 24px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-query {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .btn-query:hover {
+            background: #2980b9;
+        }
+
+        .btn-reset:hover {
+            color: #3498db;
+            border-color: #3498db;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .btn-add {
+            background: #3498db;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-add:hover {
+            background: #2980b9;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .data-table th {
+            background: #fafafa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 500;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .status-tag.enabled {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .status-tag.disabled {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        .action-link {
+            color: #3498db;
+            text-decoration: none;
+            margin-right: 12px;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .config-details {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 表单样式 */
+        .form-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .form-label {
+            width: 140px;
+            padding-top: 8px;
+            font-size: 14px;
+            color: #333;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .form-label.required:before {
+            content: "*";
+            color: #f5222d;
+            margin-right: 4px;
+        }
+
+        .form-control-wrapper {
+            flex: 1;
+            max-width: 600px;
+            margin-left: 16px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-control:disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .form-hint.warning {
+            color: #faad14;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 24px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .radio-item input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .radio-item label {
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-select:disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 10px 40px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            color: #3498db;
+            border-color: #3498db;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .interaction-notes {
+            background: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 4px;
+        }
+
+        .interaction-notes h4 {
+            font-size: 14px;
+            color: #1890ff;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .interaction-notes ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .interaction-notes li {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.8;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .interaction-notes li:before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: #1890ff;
+        }
+
+        .form-group.hidden {
+            display: none;
+        }
+
+        /* 状态开关 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #52c41a;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 原型导航 - 最顶部 -->
+    <div class="prototype-nav">
+        <div class="prototype-nav-title">原型页面导航（仅供开发参考）</div>
+        <div class="prototype-nav-desc">以下tab用于切换不同原型页面，非实际系统功能，实际开发中不需要此导航栏</div>
+        <div class="tabs">
+            <button class="tab active" data-page="list">规则列表页面</button>
+            <button class="tab" data-page="create">新增规则页面</button>
+            <button class="tab" data-page="edit">编辑规则页面</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-title">酬金业务 - 运营管理后台</div>
+        <div class="header-user">
+            <span>🔔</span>
+            <span>zhouwa</span>
+        </div>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="menu-item">订单管理</li>
+                <li class="menu-item active">运营商管理
+                    <ul class="submenu">
+                        <li class="submenu-item">产品查询</li>
+                        <li class="submenu-item">运营商列表</li>
+                        <li class="submenu-item active">组合包规避规则</li>
+                    </ul>
+                </li>
+                <li class="menu-item">地域分单</li>
+                <li class="menu-item">智能推荐</li>
+                <li class="menu-item">号码回拨配置</li>
+                <li class="menu-item">导抽链配置</li>
+                <li class="menu-item">年轻分单</li>
+                <li class="menu-item">运营商路由接口</li>
+                <li class="menu-item">异网分单</li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <!-- 规则列表页面 -->
+            <div class="prototype-page active" id="page-list">
+                <div class="breadcrumb">
+                    <div class="breadcrumb-left">
+                        运营商管理 / 组合包规避规则 / <span>列表</span>
+                    </div>
+                </div>
+
+                <div class="interaction-notes">
+                    <h4>📋 页面交互说明（V1.4更新）</h4>
+                    <ul>
+                        <li><strong>系统默认规则：</strong>"命中酬金黑名单"规则已内置代码，过滤掉所有产品，无需在此配置</li>
+                        <li><strong>新增"适用产品范围"列：</strong>显示规则应用的产品范围（全部产品/上���运营商/产品路由/产品）</li>
+                        <li><strong>过滤范围支持多条件：</strong>配置详情列可显示多个过滤条件（相同上游运营商、相同产品路由、产品标签、产品资费）</li>
+                        <li><strong>删除操作：</strong>所有规则都可以删除</li>
+                        <li><strong>启用/禁用：</strong>点击状态开关立即生效，无需刷新页面</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <!-- 筛选区域 -->
+                    <div class="filter-section">
+                        <div class="filter-item">
+                            <label class="filter-label">失败原因：</label>
+                            <select class="filter-select">
+                                <option>全部</option>
+                                <option>频次限制</option>
+                                <option>余额不足</option>
+                                <option>系统错误</option>
+                                <option>未知原因</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">启用状态：</label>
+                            <select class="filter-select">
+                                <option>全部</option>
+                                <option>已启用</option>
+                                <option>已禁用</option>
+                            </select>
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="btn-query">查询</button>
+                            <button class="btn-reset">重置</button>
+                        </div>
+                    </div>
+
+                    <!-- 表格区域 -->
+                    <div class="table-header">
+                        <div class="table-title">规避规则列表</div>
+                        <button class="btn-add" onclick="switchTab('create')">新增</button>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th width="60">序号</th>
+                                <th width="180">规则名称</th>
+                                <th width="120">失败原因</th>
+                                <th width="150">适用产品范围</th>
+                                <th>配置详情</th>
+                                <th width="100">状态</th>
+                                <th width="150">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>频次限制规避规则</td>
+                                <td><span class="status-tag enabled">频次限制</span></td>
+                                <td>全部产品</td>
+                                <td>
+                                    <div class="config-details">
+                                        <div>过滤范围：相同上游运营商 | 时间窗口：10分钟</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" class="action-link" onclick="switchTab('edit')">修改</a>
+                                    <a href="javascript:void(0)" class="action-link" onclick="confirmDelete()">删除</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>余额不足规避规则</td>
+                                <td><span class="status-tag enabled">余额不足</span></td>
+                                <td>上游运营商：广东移动</td>
+                                <td>
+                                    <div class="config-details">
+                                        <div>过滤范围：相同上游运营商 + 产品标签包含"余额校验" + 产品资费>=前置产品资费</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" class="action-link" onclick="switchTab('edit')">修改</a>
+                                    <a href="javascript:void(0)" class="action-link" onclick="confirmDelete()">删除</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 新增规则页面 -->
+            <div class="prototype-page" id="page-create">
+                <div class="breadcrumb">
+                    <div class="breadcrumb-left">
+                        运营商管理 / 组合包规避规则 / <span>新增</span>
+                    </div>
+                    <button class="btn-back" onclick="switchTab('list')">返回上一页</button>
+                </div>
+
+                <div class="interaction-notes">
+                    <h4>📋 页面交互说明（V1.4更新）</h4>
+                    <ul>
+                        <li><strong>系统默认规则：</strong>"命中酬金黑名单"规则已内置代码，过滤掉所有产品，无需在此配置</li>
+                        <li><strong>失败原因动态获取：</strong>从"备注分类智能管理"系统获取（不包括"命中酬金黑名单"），并过滤掉已配置规则的失败原因</li>
+                        <li><strong>新增"适用的产品范围"：</strong>必填字段，选择类型后级联加载对应的值选项（上游运营商/产品路由/产品）</li>
+                        <li><strong>过滤范围支持多条件：</strong>可选字段，支持添加多个过滤条件（相同上游运营商、相同产品路由、产品标签、产品资费）</li>
+                        <li><strong>产品资费条件：</strong>选择产品资费过滤时，需选择比较运算符（>/>=/ =/<=/<）</li>
+                        <li><strong>产品标签条件：</strong>选择产品标签过滤时，可多选标签</li>
+                        <li><strong>表单校验：</strong>必填项未填写时，点击"保存"按钮会在对应字段下方显示红色错误提示</li>
+                        <li><strong>取消操作：</strong>点击"取消"按钮弹出确认对话框："确认放弃编辑？未保存的内容将丢失"</li>
+                        <li><strong>保存成功：</strong>保存成功后显示Toast提示"保存成功"，1秒后自动跳转到列表页</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <div class="form-title">新增规避规则</div>
+
+                    <form id="createForm">
+                        <!-- 规则名称 -->
+                        <div class="form-group">
+                            <label class="form-label required">规则名称：</label>
+                            <div class="form-control-wrapper">
+                                <input type="text" class="form-control" placeholder="请输入规则名称，2-50个字符">
+                                <div class="form-hint">建议使用描述性名称，如"频次限制规避规则"</div>
+                            </div>
+                        </div>
+
+                        <!-- 失败原因（动态获取） -->
+                        <div class="form-group">
+                            <label class="form-label required">失败原因：</label>
+                            <div class="form-control-wrapper">
+                                <select class="form-select" id="createFailureReason">
+                                    <option value="">请选择失败原因（从备注分类系统加载中...）</option>
+                                    <!-- 动态填充，实际示例（不包括"命中酬金黑名单"） -->
+                                    <option value="RATE_LIMIT">频次限制</option>
+                                    <option value="INSUFFICIENT_BALANCE">余额不足</option>
+                                    <option value="SYSTEM_ERROR">系统错误</option>
+                                    <option value="CUSTOM_REASON">自定义原因示例</option>
+                                </select>
+                                <div class="form-hint">选择失败原因类型（不包括"命中酬金黑名单"，该规则已内置代码），每个失败原因只能配置一条规则</div>
+                            </div>
+                        </div>
+
+                        <!-- 适用的产品范围 -->
+                        <div class="form-group">
+                            <label class="form-label required">适用的产品范围：</label>
+                            <div class="form-control-wrapper">
+                                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                    <select class="form-select" id="createScopeType" style="width: 200px;">
+                                        <option value="">请选择类型</option>
+                                        <option value="ALL">全部产品</option>
+                                        <option value="OPERATOR">上游运营商</option>
+                                        <option value="ROUTE">产品路由</option>
+                                        <option value="PRODUCT">产品</option>
+                                    </select>
+                                    <select class="form-select" id="createScopeValue" style="width: 300px;" disabled>
+                                        <option value="">请先选择类型</option>
+                                    </select>
+                                </div>
+                                <div class="form-hint">选择类型后，右侧会级联加载对应的选项。"全部产品"无需选择具体值</div>
+                            </div>
+                        </div>
+
+                        <!-- 过滤范围（多条件） -->
+                        <div class="form-group">
+                            <label class="form-label">过滤范围：</label>
+                            <div class="form-control-wrapper">
+                                <div id="filterConditions">
+                                    <div class="filter-condition-row" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
+                                        <select class="form-select" style="width: 200px;">
+                                            <option value="">请选择过滤条件</option>
+                                            <option value="SAME_OPERATOR">相同上游运营商</option>
+                                            <option value="SAME_ROUTE">相同产品路由</option>
+                                            <option value="TAG">产品标签</option>
+                                            <option value="PRICE">产品资费</option>
+                                        </select>
+                                        <div class="condition-config" style="flex: 1;">
+                                            <!-- 根据选择的条件类型动态显示配置项 -->
+                                        </div>
+                                        <button type="button" class="btn-icon" onclick="removeFilterCondition(this)" style="color: #f5222d; cursor: pointer; border: none; background: none; font-size: 18px;">✕</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn" onclick="addFilterCondition()" style="margin-top: 8px;">+ 添加过滤条件</button>
+                                <div class="form-hint">可选配置，支持添加多个过滤条件，多个条件之间为且关系</div>
+                            </div>
+                        </div>
+
+                        <!-- 时间窗口 -->
+                        <div class="form-group">
+                            <label class="form-label">时间窗口：</label>
+                            <div class="form-control-wrapper">
+                                <input type="number" class="form-control" placeholder="请输入时间窗口（可选），单位：分钟" min="1" max="60">
+                                <div class="form-hint">用户在此时间窗口内调用过接口，则过滤掉对应产品。范围：1-60分钟（可选配置）</div>
+                            </div>
+                        </div>
+
+                        <!-- 按钮组 -->
+                        <div class="form-actions">
+                            <button type="button" class="btn" onclick="confirmCancel()">取消</button>
+                            <button type="button" class="btn btn-primary" onclick="saveAndBack()">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 编辑规则页面 -->
+            <div class="prototype-page" id="page-edit">
+                <div class="breadcrumb">
+                    <div class="breadcrumb-left">
+                        运营商管理 / 组合包规避规则 / <span>编辑</span>
+                    </div>
+                    <button class="btn-back" onclick="switchTab('list')">返回上一页</button>
+                </div>
+
+                <div class="interaction-notes">
+                    <h4>📋 页面交互说明（V1.4更新）</h4>
+                    <ul>
+                        <li><strong>系统默认规则：</strong>"命中酬金黑名单"规则已内置代码，无需配置</li>
+                        <li><strong>数据回显：</strong>页面加载时，所有表单字段自动回显当前规则的配置数据</li>
+                        <li><strong>失败原因禁用：</strong>所有规则编辑时，失败原因字段都禁用不可修改（因为有唯一约束）</li>
+                        <li><strong>适用产品范围回显：</strong>类型和值都会回显，类型禁用不可修改</li>
+                        <li><strong>过滤范围回显：</strong>已配置的过滤条件会全部回显，可添加/删除</li>
+                        <li><strong>表单校验：</strong>必填项未填写时，点击"保存"按钮会显示红色错误提示</li>
+                        <li><strong>取消操作：</strong>点击"取消"按钮弹出确认对话框："确认放弃编辑？未保存的修改将丢失"</li>
+                        <li><strong>保存成功：</strong>保存成功后显示Toast提示"保存成功"，1秒后自动跳转到列表页</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <div class="form-title">编辑规避规则</div>
+
+                    <!-- 表单（示例：编辑"频次限制规避规则"） -->
+                    <form id="editForm">
+                        <!-- 规则名称 -->
+                        <div class="form-group">
+                            <label class="form-label required">规则名称：</label>
+                            <div class="form-control-wrapper">
+                                <input type="text" class="form-control" value="频次限制规避规则">
+                                <div class="form-hint">建议使用描述性名称，如"频次限制规避规则"</div>
+                            </div>
+                        </div>
+
+                        <!-- 失败原因（统一禁用） -->
+                        <div class="form-group">
+                            <label class="form-label required">失败原因：</label>
+                            <div class="form-control-wrapper">
+                                <select class="form-select" disabled>
+                                    <option value="RATE_LIMIT" selected>频次限制</option>
+                                </select>
+                                <div class="form-hint warning">⚠️ 失败原因不可修改（因有唯一约束），如需更改请删除后重新创建</div>
+                            </div>
+                        </div>
+
+                        <!-- 适用的产品范围（编辑示例：全部产品） -->
+                        <div class="form-group">
+                            <label class="form-label required">适用的产品范围：</label>
+                            <div class="form-control-wrapper">
+                                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                    <select class="form-select" id="editScopeType" style="width: 200px;" disabled>
+                                        <option value="ALL" selected>全部产品</option>
+                                    </select>
+                                    <select class="form-select" id="editScopeValue" style="width: 300px;" disabled>
+                                        <option value="">无需选择</option>
+                                    </select>
+                                </div>
+                                <div class="form-hint warning">⚠️ 适用产品范围不可修改</div>
+                            </div>
+                        </div>
+
+                        <!-- 过滤范围（多条件，编辑示例：相同上游运营商） -->
+                        <div class="form-group">
+                            <label class="form-label">过滤范围：</label>
+                            <div class="form-control-wrapper">
+                                <div id="editFilterConditions">
+                                    <div class="filter-condition-row" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
+                                        <select class="form-select" style="width: 200px;">
+                                            <option value="SAME_OPERATOR" selected>相同上游运营商</option>
+                                            <option value="SAME_ROUTE">相同产品路由</option>
+                                            <option value="TAG">产品标签</option>
+                                            <option value="PRICE">产品资费</option>
+                                        </select>
+                                        <div class="condition-config" style="flex: 1;">
+                                            <span style="color: #999; font-size: 13px;">无需配置额外参数</span>
+                                        </div>
+                                        <button type="button" class="btn-icon" onclick="removeFilterCondition(this)" style="color: #f5222d; cursor: pointer; border: none; background: none; font-size: 18px;">✕</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn" onclick="addFilterCondition()" style="margin-top: 8px;">+ 添加过滤条件</button>
+                                <div class="form-hint">可选配置，支持添加多个过滤条件，多个条件之间为且关系</div>
+                            </div>
+                        </div>
+
+                        <!-- 时间窗口 -->
+                        <div class="form-group">
+                            <label class="form-label">时间窗口：</label>
+                            <div class="form-control-wrapper">
+                                <input type="number" class="form-control" value="10" min="1" max="60">
+                                <div class="form-hint">用户在此时间窗口内调用过接口，则过滤掉对应产品。范围：1-60分钟</div>
+                            </div>
+                        </div>
+
+                        <!-- 按钮组 -->
+                        <div class="form-actions">
+                            <button type="button" class="btn" onclick="confirmCancel()">取消</button>
+                            <button type="button" class="btn btn-primary" onclick="saveAndBack()">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面切换功能
+        function switchTab(pageId) {
+            // 更新Tab样式
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.page === pageId) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // 更新页面显示
+            document.querySelectorAll('.prototype-page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page-' + pageId).classList.add('active');
+
+            // 滚动到顶部
+            window.scrollTo(0, 0);
+        }
+
+        // Tab点击事件
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                switchTab(this.dataset.page);
+            });
+        });
+
+        // 适用产品范围级联选择（新增页面）
+        const createScopeType = document.getElementById('createScopeType');
+        const createScopeValue = document.getElementById('createScopeValue');
+        if (createScopeType) {
+            createScopeType.addEventListener('change', function() {
+                const type = this.value;
+                createScopeValue.disabled = false;
+                createScopeValue.innerHTML = '';
+
+                if (type === 'ALL') {
+                    createScopeValue.disabled = true;
+                    createScopeValue.innerHTML = '<option value="">无需选择</option>';
+                } else if (type === 'OPERATOR') {
+                    createScopeValue.innerHTML = '<option value="">请选择上游运营商</option>' +
+                        '<option value="GD_MOBILE">广东移动</option>' +
+                        '<option value="GD_UNICOM">广东联通</option>' +
+                        '<option value="GD_TELECOM">广东电信</option>' +
+                        '<option value="HN_MOBILE">湖南移动</option>';
+                } else if (type === 'ROUTE') {
+                    createScopeValue.innerHTML = '<option value="">请选择产品路由</option>' +
+                        '<option value="ROUTE_A">路由A</option>' +
+                        '<option value="ROUTE_B">路由B</option>';
+                } else if (type === 'PRODUCT') {
+                    createScopeValue.innerHTML = '<option value="">请选择产品</option>' +
+                        '<option value="PROD_001">产品001</option>' +
+                        '<option value="PROD_002">产品002</option>';
+                }
+            });
+        }
+
+        // 添加过滤条件
+        function addFilterCondition() {
+            const container = document.getElementById('filterConditions') || document.getElementById('editFilterConditions');
+            const row = document.createElement('div');
+            row.className = 'filter-condition-row';
+            row.style.cssText = 'display: flex; gap: 12px; margin-bottom: 12px; align-items: center;';
+            row.innerHTML = `
+                <select class="form-select" style="width: 200px;" onchange="handleConditionTypeChange(this)">
+                    <option value="">请选择过滤条件</option>
+                    <option value="SAME_OPERATOR">相同上游运营商</option>
+                    <option value="SAME_ROUTE">相同产品路由</option>
+                    <option value="TAG">产品标签</option>
+                    <option value="PRICE">产品资费</option>
+                </select>
+                <div class="condition-config" style="flex: 1;"></div>
+                <button type="button" class="btn-icon" onclick="removeFilterCondition(this)" style="color: #f5222d; cursor: pointer; border: none; background: none; font-size: 18px;">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        // 删除过滤条件
+        function removeFilterCondition(btn) {
+            btn.parentElement.remove();
+        }
+
+        // 处理过滤条件类型变更
+        function handleConditionTypeChange(select) {
+            const configDiv = select.parentElement.querySelector('.condition-config');
+            const type = select.value;
+
+            if (type === 'SAME_OPERATOR' || type === 'SAME_ROUTE') {
+                configDiv.innerHTML = '<span style="color: #999; font-size: 13px;">无需配置额外参数</span>';
+            } else if (type === 'TAG') {
+                configDiv.innerHTML = `
+                    <select class="form-select" multiple style="height: 80px;">
+                        <option value="TAG_BALANCE">存在余额校验</option>
+                        <option value="TAG_IDENTITY">需身份认证</option>
+                        <option value="TAG_CREDIT">需信用评估</option>
+                    </select>
+                    <div style="font-size: 12px; color: #999; margin-top: 4px;">可多选标签</div>
+                `;
+            } else if (type === 'PRICE') {
+                configDiv.innerHTML = `
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: #666; font-size: 13px;">产品资费</span>
+                        <select class="form-select" style="width: 120px;">
+                            <option value="GT">大于</option>
+                            <option value="GTE">大于等于</option>
+                            <option value="EQ">等于</option>
+                            <option value="LTE">小于等于</option>
+                            <option value="LT">小于</option>
+                        </select>
+                        <span style="color: #666; font-size: 13px;">前置产品资费</span>
+                    </div>
+                `;
+            } else {
+                configDiv.innerHTML = '';
+            }
+        }
+
+        // 交互提示函数
+        function confirmDelete() {
+            if (confirm('确认删除此规则？删除后不可恢复')) {
+                alert('删除成功（演示）');
+                // 实际开发中调用删除接口
+            }
+        }
+
+        function confirmCancel() {
+            if (confirm('确认放弃编辑？未保存的内容将丢失')) {
+                switchTab('list');
+            }
+        }
+
+        function saveAndBack() {
+            alert('保存成功（演示）');
+            setTimeout(() => {
+                switchTab('list');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

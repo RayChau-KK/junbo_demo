@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二次营销规避规则配置系统 - 原型导航</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 48px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .version-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .version-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        .version-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .version-tag.latest {
+            background: #28a745;
+        }
+        .version-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .version-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+        .version-features {
+            margin-top: 12px;
+            padding-left: 20px;
+        }
+        .version-features li {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e9ecef;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>二次营销规避规则配置系统</h1>
+        <div class="subtitle">交互原型 - 请选择版本查看</div>
+
+        <a href="prototype-v1.4.html">
+            <div class="version-card">
+                <span class="version-tag latest">最新版本</span>
+                <div class="version-title">V1.4 完整原型</div>
+                <div class="version-desc">
+                    包含规则列表、新增规则、编辑规则三个完整页面
+                </div>
+                <ul class="version-features">
+                    <li>�� 适用产品范围（级联选择）</li>
+                    <li>✓ 过滤范围多条件配置</li>
+                    <li>✓ 产品范围优先级：指定产品 > 产品路由 > 上游运营商</li>
+                    <li>✓ 失败原因+产品范围唯一性约束</li>
+                </ul>
+            </div>
+        </a>
+
+        <div class="footer">
+            更新日期：2026-01-21 | 产品中心
+        </div>
+    </div>
+</body>
+</html>
