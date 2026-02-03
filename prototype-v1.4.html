@@ -698,7 +698,7 @@
                                 <td>全部产品</td>
                                 <td>
                                     <div class="config-details">
-                                        <div>过滤范围：相同上游运营商 | 时间窗口：10分钟</div>
+                                        <div>过滤范围：相同上游运营商</div>
                                     </div>
                                 </td>
                                 <td>
@@ -821,8 +821,6 @@
                                             <option value="">请选择过滤条件</option>
                                             <option value="SAME_OPERATOR">相同上游运营商</option>
                                             <option value="SAME_ROUTE">相同产品路由</option>
-                                            <option value="TAG">产品标签</option>
-                                            <option value="PRICE">产品资费</option>
                                         </select>
                                         <div class="condition-config" style="flex: 1;">
                                             <!-- 根据选择的条件类型动态显示配置项 -->
@@ -832,15 +830,6 @@
                                 </div>
                                 <button type="button" class="btn" onclick="addFilterCondition()" style="margin-top: 8px;">+ 添加过滤条件</button>
                                 <div class="form-hint">可选配置，支持添加多个过滤条件，多个条件之间为且关系</div>
-                            </div>
-                        </div>
-
-                        <!-- 时间窗口 -->
-                        <div class="form-group">
-                            <label class="form-label">时间窗口：</label>
-                            <div class="form-control-wrapper">
-                                <input type="number" class="form-control" placeholder="请输入时间窗口（可选），单位：分钟" min="1" max="60">
-                                <div class="form-hint">用户在此时间窗口内调用过接口，则过滤掉对应产品。范围：1-60分钟（可选配置）</div>
                             </div>
                         </div>
 
@@ -940,15 +929,6 @@
                             </div>
                         </div>
 
-                        <!-- 时间窗口 -->
-                        <div class="form-group">
-                            <label class="form-label">时间窗口：</label>
-                            <div class="form-control-wrapper">
-                                <input type="number" class="form-control" value="10" min="1" max="60">
-                                <div class="form-hint">用户在此时间窗口内调用过接口，则过滤掉对应产品。范围：1-60分钟</div>
-                            </div>
-                        </div>
-
                         <!-- 按钮组 -->
                         <div class="form-actions">
                             <button type="button" class="btn" onclick="confirmCancel()">取消</button>
@@ -1029,8 +1009,6 @@
                     <option value="">请选择过滤条件</option>
                     <option value="SAME_OPERATOR">相同上游运营商</option>
                     <option value="SAME_ROUTE">相同产品路由</option>
-                    <option value="TAG">产品标签</option>
-                    <option value="PRICE">产品资费</option>
                 </select>
                 <div class="condition-config" style="flex: 1;"></div>
                 <button type="button" class="btn-icon" onclick="removeFilterCondition(this)" style="color: #f5222d; cursor: pointer; border: none; background: none; font-size: 18px;">✕</button>
@@ -1050,29 +1028,6 @@
 
             if (type === 'SAME_OPERATOR' || type === 'SAME_ROUTE') {
                 configDiv.innerHTML = '<span style="color: #999; font-size: 13px;">无需配置额外参数</span>';
-            } else if (type === 'TAG') {
-                configDiv.innerHTML = `
-                    <select class="form-select" multiple style="height: 80px;">
-                        <option value="TAG_BALANCE">存在余额校验</option>
-                        <option value="TAG_IDENTITY">需身份认证</option>
-                        <option value="TAG_CREDIT">需信用评估</option>
-                    </select>
-                    <div style="font-size: 12px; color: #999; margin-top: 4px;">可多选标签</div>
-                `;
-            } else if (type === 'PRICE') {
-                configDiv.innerHTML = `
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <span style="color: #666; font-size: 13px;">产品资费</span>
-                        <select class="form-select" style="width: 120px;">
-                            <option value="GT">大于</option>
-                            <option value="GTE">大于等于</option>
-                            <option value="EQ">等于</option>
-                            <option value="LTE">小于等于</option>
-                            <option value="LT">小于</option>
-                        </select>
-                        <span style="color: #666; font-size: 13px;">前置产品资费</span>
-                    </div>
-                `;
             } else {
                 configDiv.innerHTML = '';
             }
