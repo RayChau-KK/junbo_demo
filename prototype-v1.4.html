@@ -803,11 +803,13 @@
                                         <option value="ROUTE">产品路由</option>
                                         <option value="PRODUCT">产品</option>
                                     </select>
-                                    <select class="form-select" id="createScopeValue" style="width: 300px;" disabled>
-                                        <option value="">请先选择类型</option>
-                                    </select>
+                                    <div id="createScopeValueContainer" style="flex: 1;">
+                                        <select class="form-select" id="createScopeValue" style="width: 100%;" disabled>
+                                            <option value="">请先选择类型</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="form-hint">选择类型后，右侧会级联加载对应的选项。"全部产品"无需选择具体值</div>
+                                <div class="form-hint">选择类型后，右侧会级联加载对应的选项。选择"产品"时，可输入多个产品编码（每行一个）</div>
                             </div>
                         </div>
 
@@ -970,30 +972,35 @@
 
         // 适用产品范围级联选择（新增页面）
         const createScopeType = document.getElementById('createScopeType');
-        const createScopeValue = document.getElementById('createScopeValue');
-        if (createScopeType) {
+        const createScopeValueContainer = document.getElementById('createScopeValueContainer');
+        if (createScopeType && createScopeValueContainer) {
             createScopeType.addEventListener('change', function() {
                 const type = this.value;
-                createScopeValue.disabled = false;
-                createScopeValue.innerHTML = '';
 
                 if (type === 'ALL') {
-                    createScopeValue.disabled = true;
-                    createScopeValue.innerHTML = '<option value="">无需选择</option>';
+                    createScopeValueContainer.innerHTML = '<select class="form-select" id="createScopeValue" style="width: 100%;" disabled><option value="">无需选择</option></select>';
                 } else if (type === 'OPERATOR') {
-                    createScopeValue.innerHTML = '<option value="">请选择上游运营商</option>' +
-                        '<option value="GD_MOBILE">广东移动</option>' +
-                        '<option value="GD_UNICOM">广东联通</option>' +
-                        '<option value="GD_TELECOM">广东电信</option>' +
-                        '<option value="HN_MOBILE">湖南移动</option>';
+                    createScopeValueContainer.innerHTML = `
+                        <select class="form-select" id="createScopeValue" style="width: 100%;">
+                            <option value="">请选择上游运营商</option>
+                            <option value="GD_MOBILE">广东移动</option>
+                            <option value="GD_UNICOM">广东联通</option>
+                            <option value="GD_TELECOM">广东电信</option>
+                            <option value="HN_MOBILE">湖南移动</option>
+                        </select>`;
                 } else if (type === 'ROUTE') {
-                    createScopeValue.innerHTML = '<option value="">请选择产品路由</option>' +
-                        '<option value="ROUTE_A">路由A</option>' +
-                        '<option value="ROUTE_B">路由B</option>';
+                    createScopeValueContainer.innerHTML = `
+                        <select class="form-select" id="createScopeValue" style="width: 100%;">
+                            <option value="">请选择产品路由</option>
+                            <option value="ROUTE_A">路由A</option>
+                            <option value="ROUTE_B">路由B</option>
+                        </select>`;
                 } else if (type === 'PRODUCT') {
-                    createScopeValue.innerHTML = '<option value="">请选择产品</option>' +
-                        '<option value="PROD_001">产品001</option>' +
-                        '<option value="PROD_002">产品002</option>';
+                    createScopeValueContainer.innerHTML = `
+                        <textarea class="form-control" id="createScopeValue" rows="5" style="width: 100%; resize: vertical;" placeholder="请输入产品编码，每行一个，例如：&#10;PROD_001&#10;PROD_002&#10;PROD_003"></textarea>
+                        <div style="font-size: 12px; color: #999; margin-top: 4px;">每行输入一个产品编码</div>`;
+                } else {
+                    createScopeValueContainer.innerHTML = '<select class="form-select" id="createScopeValue" style="width: 100%;" disabled><option value="">请先选择类型</option></select>';
                 }
             });
         }
