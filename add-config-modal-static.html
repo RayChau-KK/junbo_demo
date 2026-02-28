@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增配置弹窗 - 三状态演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* 状态切换控制面板 */
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .control-panel h3 {
+            font-size: 18px;
+            color: #1F2937;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .state-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .state-btn {
+            padding: 10px 20px;
+            border: 2px solid #D1D5DB;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .state-btn:hover {
+            border-color: #3B82F6;
+            color: #3B82F6;
+        }
+
+        .state-btn.active {
+            background: #3B82F6;
+            border-color: #3B82F6;
+            color: white;
+        }
+
+        .state-description {
+            margin-top: 15px;
+            padding: 15px;
+            background: #F3F4F6;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #6B7280;
+            line-height: 1.6;
+        }
+
+        /* 弹窗遮罩层 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        /* 弹窗容器 */
+        .modal-container {
+            width: 440px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        /* 标题栏 */
+        .modal-header {
+            height: 50px;
+            background: #FAFAFA;
+            border-bottom: 1px solid #E5E7EB;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1F2937;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6B7280;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+        }
+
+        .modal-close:hover {
+            color: #374151;
+        }
+
+        /* 表单内容 */
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #EF4444;
+        }
+
+        /* 选择框 */
+        .select-wrapper {
+            position: relative;
+        }
+
+        .form-select {
+            width: 100%;
+            height: 36px;
+            padding: 0 12px;
+            background: white;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+            appearance: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+
+        .form-select option {
+            color: #1F2937;
+        }
+
+        .form-select option:first-child {
+            color: #9CA3AF;
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6B7280;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        /* 输入框 */
+        .form-input {
+            width: 100%;
+            height: 36px;
+            padding: 0 12px;
+            background: white;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+
+        /* 单选按钮组 */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .radio-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .radio-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #D1D5DB;
+            position: relative;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .radio-label:hover .radio-circle {
+            border-color: #9CA3AF;
+        }
+
+        .radio-input:checked + .radio-circle {
+            border-color: #3B82F6;
+        }
+
+        .radio-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3B82F6;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .radio-input:checked + .radio-circle::after {
+            opacity: 1;
+        }
+
+        .radio-text {
+            margin-left: 8px;
+            font-size: 14px;
+            color: #6B7280;
+            transition: color 0.2s;
+        }
+
+        .radio-input:checked ~ .radio-text {
+            color: #1F2937;
+        }
+
+        /* 链接输入框容器 */
+        .link-input-container {
+            margin-top: 12px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 底部按钮 */
+        .modal-footer {
+            padding: 0 24px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn {
+            height: 32px;
+            padding: 0 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-weight: 500;
+        }
+
+        .btn-cancel {
+            background: white;
+            border: 1px solid #D1D5DB;
+            color: #374151;
+        }
+
+        .btn-cancel:hover {
+            background: #F9FAFB;
+        }
+
+        .btn-confirm {
+            background: #3B82F6;
+            color: white;
+            min-width: 70px;
+        }
+
+        .btn-confirm:hover {
+            background: #2563EB;
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态控制面板 -->
+    <div class="control-panel">
+        <h3>📋 选择展示状态</h3>
+        <div class="state-buttons">
+            <button class="state-btn active" data-state="before">改造前</button>
+            <button class="state-btn" data-state="after_tail">改造后 - 跳转尾量</button>
+            <button class="state-btn" data-state="after_link">改造后 - 跳转链接</button>
+        </div>
+        <div class="state-description">
+            <strong>当前状态：</strong><span id="currentStateDesc">改造前 - 仅显示投放渠道和跳转链接输入框</span>
+        </div>
+    </div>
+
+    <!-- 弹窗遮罩层 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-container">
+            <!-- 标题栏 -->
+            <div class="modal-header">
+                <h2 class="modal-title">新增配置</h2>
+                <button class="modal-close" id="closeBtn">×</button>
+            </div>
+
+            <!-- 表单内容 -->
+            <div class="modal-body">
+                <!-- 投放渠道 -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="required">*</span> 投放渠道
+                    </label>
+                    <div class="select-wrapper">
+                        <select class="form-select" id="channelSelect">
+                            <option value="">请选择投放渠道</option>
+                            <option value="channel1">渠道1</option>
+                            <option value="channel2">渠道2</option>
+                            <option value="channel3">渠道3</option>
+                        </select>
+                        <span class="select-arrow">▼</span>
+                    </div>
+                </div>
+
+                <!-- 改造前：跳转链接输入框 -->
+                <div class="form-group" id="beforeTransformInput">
+                    <label class="form-label">
+                        <span class="required">*</span> 跳转链接
+                    </label>
+                    <input type="text" class="form-input" id="jumpLinkInput" placeholder="请输入跳转链接">
+                </div>
+
+                <!-- 改造后：跳转类型选择 -->
+                <div class="form-group hidden" id="afterTransformGroup">
+                    <label class="form-label">
+                        <span class="required">*</span> 跳转类型
+                    </label>
+                    <div class="radio-group">
+                        <!-- 跳转链接 -->
+                        <label class="radio-label">
+                            <input type="radio" name="jumpType" value="link" class="radio-input" id="radioLink">
+                            <div class="radio-circle"></div>
+                            <span class="radio-text">跳转链接</span>
+                        </label>
+
+                        <!-- 跳转尾量 -->
+                        <label class="radio-label">
+                            <input type="radio" name="jumpType" value="tail" class="radio-input" id="radioTail">
+                            <div class="radio-circle"></div>
+                            <span class="radio-text">跳转尾量</span>
+                        </label>
+                    </div>
+
+                    <!-- 改造后-选择跳转链接时显示输入框 -->
+                    <div class="link-input-container hidden" id="linkInputContainer">
+                        <input type="text" class="form-input" id="afterJumpLinkInput" placeholder="请输入跳转链接">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部按钮 -->
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelBtn">取消</button>
+                <button class="btn btn-confirm" id="confirmBtn">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 状态枚举
+        const ConfigState = {
+            BEFORE_TRANSFORM: 'before',
+            AFTER_TRANSFORM_TAIL: 'after_tail',
+            AFTER_TRANSFORM_LINK: 'after_link'
+        };
+
+        // 跳转类型枚举
+        const JumpType = {
+            LINK: 'link',
+            TAIL: 'tail'
+        };
+
+        // 状态描述
+        const stateDescriptions = {
+            'before': '改造前 - 仅显示投放渠道和跳转链接输入框',
+            'after_tail': '改造后 - 显示跳转类型选择,默认选中"跳转尾量"',
+            'after_link': '改造后 - 显示跳转类型选择,默认选中"跳转链接",并显示链接输入框'
+        };
+
+        // 当前状态
+        let currentState = ConfigState.BEFORE_TRANSFORM;
+
+        // 获取DOM元素
+        const modalOverlay = document.getElementById('modalOverlay');
+        const closeBtn = document.getElementById('closeBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const channelSelect = document.getElementById('channelSelect');
+        const beforeTransformInput = document.getElementById('beforeTransformInput');
+        const afterTransformGroup = document.getElementById('afterTransformGroup');
+        const radioLink = document.getElementById('radioLink');
+        const radioTail = document.getElementById('radioTail');
+        const linkInputContainer = document.getElementById('linkInputContainer');
+        const stateButtons = document.querySelectorAll('.state-btn');
+        const currentStateDesc = document.getElementById('currentStateDesc');
+
+        // 更新UI状态
+        function updateUIState(state) {
+            currentState = state;
+
+            // 更新状态描述
+            currentStateDesc.textContent = stateDescriptions[state];
+
+            // 重置表单
+            channelSelect.value = '';
+            document.getElementById('jumpLinkInput').value = '';
+            document.getElementById('afterJumpLinkInput').value = '';
+
+            // 根据状态切换显示
+            if (state === ConfigState.BEFORE_TRANSFORM) {
+                // 改造前
+                beforeTransformInput.classList.remove('hidden');
+                afterTransformGroup.classList.add('hidden');
+            } else {
+                // 改造后
+                beforeTransformInput.classList.add('hidden');
+                afterTransformGroup.classList.remove('hidden');
+
+                // 设置默认选中的跳转类型
+                if (state === ConfigState.AFTER_TRANSFORM_TAIL) {
+                    radioTail.checked = true;
+                    linkInputContainer.classList.add('hidden');
+                } else if (state === ConfigState.AFTER_TRANSFORM_LINK) {
+                    radioLink.checked = true;
+                    linkInputContainer.classList.remove('hidden');
+                }
+            }
+        }
+
+        // 状态切换按钮点击事件
+        stateButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 更新按钮激活状态
+                stateButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // 更新UI状态
+                const state = btn.dataset.state;
+                updateUIState(state);
+            });
+        });
+
+        // 单选按钮变化事件
+        document.querySelectorAll('input[name="jumpType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === JumpType.LINK) {
+                    linkInputContainer.classList.remove('hidden');
+                } else {
+                    linkInputContainer.classList.add('hidden');
+                    document.getElementById('afterJumpLinkInput').value = '';
+                }
+            });
+        });
+
+        // 关闭弹窗
+        function closeModal() {
+            // 这里可以添加关闭动画
+            console.log('关闭弹窗');
+        }
+
+        // 确认按钮
+        function confirmModal() {
+            const channel = channelSelect.value;
+            let jumpType = null;
+            let jumpLink = '';
+
+            if (currentState === ConfigState.BEFORE_TRANSFORM) {
+                jumpLink = document.getElementById('jumpLinkInput').value;
+            } else {
+                jumpType = document.querySelector('input[name="jumpType"]:checked')?.value;
+                if (jumpType === JumpType.LINK) {
+                    jumpLink = document.getElementById('afterJumpLinkInput').value;
+                }
+            }
+
+            console.log('提交配置:', {
+                state: currentState,
+                channel: channel,
+                jumpType: jumpType,
+                jumpLink: jumpLink
+            });
+
+            alert(`配置提交成功!\n\n状态: ${stateDescriptions[currentState]}\n投放渠道: ${channel || '未选择'}\n跳转类型: ${jumpType || '无'}\n跳转链接: ${jumpLink || '无'}`);
+        }
+
+        // 绑定事件
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        confirmBtn.addEventListener('click', confirmModal);
+
+        // 点击遮罩层关闭（可选）
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+
+        // 初始化状态
+        updateUIState(ConfigState.BEFORE_TRANSFORM);
+    </script>
+</body>
+</html>
